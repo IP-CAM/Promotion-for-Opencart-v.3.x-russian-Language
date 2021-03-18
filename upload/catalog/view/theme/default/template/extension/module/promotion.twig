@@ -1,0 +1,223 @@
+<style>
+  .box-shadow-none {
+    box-shadow: none;
+  }
+  .product-card {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 0 10px 10px 10px;
+  }
+  .product-card-col {
+    width: 50%;
+  }
+  .product-card-left {
+    margin-right: 8px;
+  }
+  .product-card-right {
+
+  }
+  .product-card-button button {
+    border: none;
+    background-color: transparent;
+    font-size: 14px;
+  }
+  .button-buy button {
+    width: 100%;
+    padding: 5px;
+    background-color: #7AC143;
+    color: white;
+    border-radius: 6px;
+  }
+  .button-buy button span {
+    margin-right: 5px;
+  }
+  .button-wishlist button i {
+    color: #dedede;
+  }
+  .product-card .rating {
+    display: flex;
+    margin-right: 7px;
+  }
+  .product-card .rating .fa-star {
+    color: #999;
+  }
+  .product-card .rating .fa-star-o {
+    color: #999;
+  }
+  .product-card-title {
+
+  }
+  .caption {
+    margin-bottom: 30px;
+  }
+  .product-card-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  .product-card .product-card-right .product-card-bottom .price {
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: row;
+  }
+  .product-card .product-card-right .product-card-bottom .price .price-old {
+    color: #999;
+    text-decoration: line-through;
+    margin-left: 10px;
+  }
+  .promotion-ticket {
+    background-color: #043D44;
+    color: white;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    padding: 7px;
+    margin-bottom: 8px;
+  }
+  .promotion-ticket > p {
+    margin: 0;
+    font-size: 11px;
+  }
+  .promotion-ticket-timer {
+    display: flex;
+    flex-direction: row;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+  }
+  .swiper-heading {
+    display:flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .swiper-heading .swiper-buttons {
+    display: flex;
+  }
+  .swiper-heading .swiper-buttons span {
+    padding: 10px;
+    background-color: #7AC143;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background-color .3s cubic-bezier(.785,.135,.15,.86),color .3s cubic-bezier(.785,.135,.15,.86);
+    outline: none;
+  }
+  .swiper-heading .swiper-buttons span:hover {
+    background-color: #018c44;
+  }
+  .swiper-heading .swiper-buttons span:nth-child(1) {
+    border-bottom-left-radius: 6px;
+    border-top-left-radius: 6px;
+  }
+  .swiper-heading .swiper-buttons span:nth-child(2) {
+    border-bottom-right-radius: 6px;
+    border-top-right-radius: 6px;
+  }
+</style>
+
+<div class="swiper-heading">
+  <h3>{{ heading_title }}</h3>
+  <div class="swiper-buttons">
+    <span class="promotion-swiper-button-prev{{ module }}"><</span>
+    <span class="promotion-swiper-button-next{{ module }}">></span>
+  </div>
+</div>
+
+<div class="swiper-viewport box-shadow-none">
+  <div id="promotion{{ module }}" class="swiper-container">
+    <div class="swiper-wrapper">
+      {% for product in products %}
+      <div class="swiper-slide text-center">
+        <div class="product-layout" >
+          <div class="product-card transition">
+            <div class="product-card-left product-card-col">
+              <div class="image"><a href="{{ product.href }}"><img src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" class="img-responsive" /></a></div>
+            </div>
+            <div class="product-card-right product-card-col">
+              {% if product.date_end %}
+                <div class="promotion-ticket">
+                    <p>{{ promotion_text }}</p>
+                    <div class="promotion-ticket-timer">
+                      {% for date in product.date_end %}
+                        <span style="display:flex; flex-direction: column; padding: 1px; margin: 0 3px;"><span>{{ date.count }}</span><span style="font-size: 6px;">{{ date.text }}</span></span>{% if date.text != 'сек.' %}<span>:</span>{% endif %}
+                      {% endfor %}
+                    </div>
+                </div>
+              {% endif %}
+              <div class="caption">
+                <p class="product-card-title">{{ product.name }}</p>
+                <div class="product-card-row">
+                  {% if product.rating %}
+                    <div class="rating">
+                      {% for i in 1..5 %}
+                        {% if product.rating < i %}
+                          <span class="fa fa-stack"><i class="fa fa-star-o fa-stack-2x"></i></span>
+                        {% else %}
+                          <span class="fa fa-stack"><i class="fa fa-star fa-stack-2x"></i><i class="fa fa-star-o fa-stack-2x"></i></span>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                  <div class="product-card-button button-wishlist">
+                    <button type="button" data-toggle="tooltip" title="{{ button_wishlist }}" onclick="wishlist.add('{{ product.product_id }}');"><i class="fa fa-heart"></i></button>
+                  </div>
+                </div>
+              </div>
+              <div class="product-card-bottom">
+                {% if product.price %}
+                  <p class="price">
+                    {% if not product.special %}
+                      {{ product.price }}
+                    {% else %}
+                      <span class="price-new">{{ product.special }}</span> <span class="price-old">{{ product.price }}</span>
+                    {% endif %}
+                    {% if product.tax %}
+                      <span class="price-tax">{{ text_tax }} {{ product.tax }}</span>
+                    {% endif %}
+                  </p>
+                {% endif %}
+                <div class="product-card-button button-buy">
+                  <button type="button" onclick="cart.add('{{ product.product_id }}');"><span class="hidden-xs hidden-sm hidden-md">{{ button_cart }}</span><i class="fa fa-shopping-cart"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+</div>
+
+<script type="text/javascript"><!--
+$('#promotion{{ module }}').swiper({
+	mode: 'horizontal',
+	slidesPerView: {{ count_visible }},
+  nextButton: '.promotion-swiper-button-next{{ module }}',
+	prevButton: '.promotion-swiper-button-prev{{ module }}',
+  spaceBetween: 10,
+	autoplay: 4500,
+	loop: true,
+    breakpoints: {
+        // when window width is >= 480px
+      480: {
+          slidesPerView: 1,
+          spaceBetween: 30
+      },
+      // when window width is >= 640px
+      768: {
+          slidesPerView: 2,
+          spaceBetween: 20
+      },
+      // when window width is >= 640px
+      1199: {
+          slidesPerView: 3,
+          spaceBetween: 10
+      }
+  }
+});
+--></script>

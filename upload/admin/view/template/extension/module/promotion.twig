@@ -1,0 +1,132 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a></div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-name">{{ entry_name }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="name" value="{{ name }}" placeholder="{{ entry_name }}" id="input-name" class="form-control" />
+              {% if error_name %}
+              <div class="text-danger">{{ error_name }}</div>
+              {% endif %}
+            </div>
+          </div>          
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-product"><span data-toggle="tooltip" title="{{ help_product }}">{{ entry_product }}</span></label>
+            <div class="col-sm-10">
+              <div class="products-list">
+                {% if products %}
+                  {% for product in products %}
+                    <div class="products-inputs" style="margin-bottom: 15px; display: flex; justify-content: space-between;">
+                      <input type="text" name="product_name[]" value="{{ product.name }}" placeholder="{{ entry_product }}" id="input-product" class="form-control" style="max-width: 65%;" />
+                      <input type="hidden" name="product_id[]" value="{{ product.product_id }}" />
+                      <input class="form-control" type="date" name="date_end[]" value="{{ product.date_end }}" style="max-width: 30%;" />
+                      <span onclick="$(this).parent().remove()" data-toggle="tooltip" title="" class="btn btn-danger" data-original-title="Удалить товар"><i class="fa fa-minus-circle"></i></span>
+                    </div>
+                  {% endfor %}
+                {% endif %}              
+              </div>
+              <div class="products-inputs" style="margin-bottom: 15px; display: flex; justify-content: flex-end;">
+                <span data-toggle="tooltip" id="add-product" title="" class="btn btn-primary" data-original-title="Добавить товар"><i class="fa fa-plus-circle"></i></span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-count-visible">{{ entry_count_visible }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="count_visible" value="{{ count_visible }}" placeholder="{{ entry_count_visible }}" id="input-count-visible" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-promotion-text">{{ entry_promotion_text }}</label>
+            <div class="col-sm-10">
+              <input type="text" name="promotion_text" value="{{ promotion_text }}" placeholder="{{ help_promotion_text }}" id="input-promotion-text" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+            <div class="col-sm-10">
+              <select name="status" id="input-status" class="form-control">
+                {% if status %}
+                <option value="1" selected="selected">{{ text_enabled }}</option>
+                <option value="0">{{ text_disabled }}</option>
+                {% else %}
+                <option value="1">{{ text_enabled }}</option>
+                <option value="0" selected="selected">{{ text_disabled }}</option>
+                {% endif %}
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript"><!--
+
+function initAutocomplete() {
+  $('input[name=\'product_name[]\']').autocomplete({
+    source: function(request, response) {
+      $.ajax({
+        url: 'index.php?route=catalog/product/autocomplete&user_token={{ user_token }}&filter_name=' +  encodeURIComponent(request),
+        dataType: 'json',
+        success: function(json) {
+          response($.map(json, function(item) {
+            return {
+              label: item['name'],
+              value: item['product_id']
+            }
+          }));
+        }
+      });
+    },
+    select: function(item) {
+      $(this).parent().find('input[name=\'product_name[]\']').val(item['label']);
+    
+      console.log($(this).parent().find('input[name=\'product_id[]\']').val(item['value']));		
+    }
+  });
+}
+initAutocomplete()
+
+function dateToYMD(date) {
+    var d = date.getDate() + 1;
+    var m = date.getMonth() + 1;
+    var y = date.getFullYear();
+    return '' + y + '-' + (m<=9 ? '0' + m : m) + '-' + (d <= 9 ? '0' + d : d);
+}
+
+$('#add-product').on('click', function() {
+    let dateNow = new Date(Date.now());
+    let formatDate = dateToYMD(dateNow);
+  $('.products-list').append('<div class="products-inputs" style="margin-bottom: 15px; display: flex; justify-content: space-between;"><input type="text" name="product_name[]" value="" placeholder="{{ entry_product }}" id="input-product" class="form-control" style="max-width: 65%;" /><input type="hidden" name="product_id[]" value="" /><input class="form-control" type="date" name="date_end[]" value="' + formatDate + '" style="max-width: 30%;" /><span onclick="$(this).parent().remove()" data-toggle="tooltip" title="" class="btn btn-danger" data-original-title="Удалить товар"><i class="fa fa-minus-circle"></i></span></div>')
+  initAutocomplete()
+});
+	
+$('#featured-product').delegate('.fa-minus-circle', 'click', function() {
+	$(this).parent().remove();
+});
+//--></script></div>
+{{ footer }}
