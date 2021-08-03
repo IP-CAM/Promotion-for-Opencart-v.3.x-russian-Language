@@ -61,6 +61,18 @@ class ControllerExtensionModulePromotion extends Controller {
 						$date_end = $this->downcounter($setting['date_end'][$key]);
 					}
 
+                    $this->load->model('catalog/category');
+                    $this->load->model('catalog/product');
+                    $getCategories = $this->model_catalog_product->getCategories($product_info['product_id']);
+                    $category = array_shift($getCategories);
+                    $category_info = $this->model_catalog_category->getCategoryPath($category['category_id']);
+
+                    if ($category_info['path_id'] != $category_info['category_id']) {
+                        $product_link = $this->url->link('product/product', 'path=' . $category_info['path_id'] . '_' . $category_info['category_id'] . '&product_id=' . $product_info['product_id']);
+                    } else {
+                        $product_link = $this->url->link('product/product', 'path=' . $category_info['category_id'] . '&product_id=' . $product_info['product_id']);
+                    }
+
 					$data['products'][] = array(
 						'product_id'  => $product_info['product_id'],
 						'thumb'       => $image,
@@ -70,7 +82,7 @@ class ControllerExtensionModulePromotion extends Controller {
 						'special'     => $special,
 						'tax'         => $tax,
 						'rating'      => $rating,
-						'href'        => $this->url->link('product/product', 'product_id=' . $product_info['product_id']),
+						'href'        => $product_link,
 						'date_end'    => $date_end
 					);
 				}
