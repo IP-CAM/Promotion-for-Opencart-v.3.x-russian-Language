@@ -81,17 +81,25 @@ class ControllerExtensionModulePromotion extends Controller {
                             unset($categoriesPaths[$key]);
                         }
                     }
-                    if (!empty($categoriesPaths)) {
-                        $currentCategoryPaths = min($categoriesPaths);
+		            if (!empty($categoriesPaths)) {
+		                $min_category_id = 1000000000;
+		                $currentCategoryPaths = array();
 
-                        foreach ($currentCategoryPaths as $kk => $currentCategoryPath) {
-                            if ($kk != (count($currentCategoryPaths) - 1)) {
-                                $path .= $currentCategoryPath['path_id'] . '_';
-                            } else {
-                                $path .= $currentCategoryPath['path_id'];
-                            }
-                        }
-                    }
+		                foreach ($categoriesPaths as $key => $item) {
+		                    if (isset($item[0]) && isset($item[0]['path_id']) && $item[0]['path_id'] < $min_category_id) {
+		                        $min_category_id = $item[0]['path_id'];
+		                        $currentCategoryPaths = $item;
+		                    }
+		                }
+
+		                foreach ($currentCategoryPaths as $kk => $currentCategoryPath) {
+		                    if ($kk != (count($currentCategoryPaths) - 1)) {
+		                        $path .= $currentCategoryPath['path_id'] . '_';
+		                    } else {
+		                        $path .= $currentCategoryPath['path_id'];
+		                    }
+		                }
+		            }
 
                     if(!empty($path)) {
                         $product_link = $this->url->link('product/product', 'path=' . $path . '&product_id=' . $product_info['product_id']);
